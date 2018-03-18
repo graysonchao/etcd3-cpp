@@ -27,12 +27,19 @@ if (!status.ok()) {
 [Full documentation](https://coreos.com/etcd/docs/latest/dev-guide/api_reference_v3.html) is available.
 
 ## Building
-gRPC and Protobufs must be installed.
+gRPC and Protobufs must be installed. A suitable version of gRPC is provided as a submodule.
 
-As of this writing, gRPC for C++ must be [installed from
-source](https://github.com/grpc/grpc/blob/master/INSTALL.md). Note that gRPC 
-installs Protobuf as a third-party dependency.
+First, install gRPC:
+```
+$ pwd
+/home/gchao/code/etcd3-cpp
+$ git submodule update --init
+$ cd grpc
+$ make
+$ make install
+```
 
+Then, build etcd3-cpp:
 ```
 $ pwd
 /home/gchao/code/etcd3-cpp
