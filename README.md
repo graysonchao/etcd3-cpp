@@ -1,5 +1,8 @@
 # etcd3-cpp
-A thin C++ wrapper for the etcd3 gRPC API. IN EARLY DEVELOPMENT.
+A thin C++ wrapper for the etcd3 gRPC API.
+
+## This library is in early development. It's not suitable for production use.
+It lacks some core API features, and asynchronous gRPC usage is entirely unimplemented.
 
 ## What do you mean by thin?
 etcd3-cpp (currently) makes no attempt to hide gRPC from the user. Rather, 
