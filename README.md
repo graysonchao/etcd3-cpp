@@ -11,6 +11,10 @@ and the user is meant to check this to detect failures and retry.
 
 ```
 #include "etcd3/include/etcd3.h"
+
+auto channel = grpc::CreateChannel("127.0.0.1:1337", grpc::InsecureChannelCredentials());
+auto etcd_client = etcd3::Client(channel);
+
 etcd::pb::PutRequest request;
 request.set_key("key");
 request.set_value("value");
