@@ -10,6 +10,7 @@ and the user is meant to check this to detect failures and retry.
 ## Usage
 
 ```
+#include <grpcpp/grpcpp.h>
 #include "etcd3/include/etcd3.h"
 
 auto channel = grpc::CreateChannel("127.0.0.1:1337", grpc::InsecureChannelCredentials());
