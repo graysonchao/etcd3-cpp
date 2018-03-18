@@ -23,9 +23,8 @@ if (!status.ok()) {
 } else {
  rest_easy();
 }
-
-
 ```
+[Full documentation](https://coreos.com/etcd/docs/latest/dev-guide/api_reference_v3.html) is available.
 
 ## Building
 gRPC and Protobufs must be installed.
@@ -47,7 +46,7 @@ $ make
 ## Notes
 This repo provides prebuilt C++ source files that provide the etcd3 API 
 protobufs types because it's complicated and error-prone to extract 
-these definitions from the etcd repo. I'm open to 
+these definitions from the etcd repo.
 
 
 gRPC is included in this repo under `third_party/grpc`. The submodule just
