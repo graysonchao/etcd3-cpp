@@ -56,6 +56,12 @@ grpc::Status Client::Range(const pb::RangeRequest& req,
   return kv_stub_->Range(&context, req, res);
 }
 
+grpc::Status Client::DeleteRange(const pb::DeleteRangeRequest& req,
+                                 pb::DeleteRangeResponse* res) const {
+  grpc::ClientContext context;
+  return kv_stub_->DeleteRange(&context, req, res);
+}
+
 grpc::Status Client::LeaseGrant(const pb::LeaseGrantRequest& req,
                                       pb::LeaseGrantResponse* res) {
   grpc::ClientContext context;
@@ -91,10 +97,12 @@ grpc::Status Client::Transaction(const pb::TxnRequest& req,
   return kv_stub_->Txn(&context, req, res);
 }
 
-WatchStreamPtr Client::MakeWatchStream(const pb::WatchRequest& req) {
+WatchStreamPtr Client::MakeWatchStream(pb::WatchCreateRequest* req) const {
   auto context = new grpc::ClientContext();
   auto watch_stream = watch_stub_->Watch(context);
-  watch_stream->Write(req);
+  etcd3::pb::WatchRequest wrapper;
+  wrapper.set_allocated_create_request(req);
+  watch_stream->Write(wrapper);
   return watch_stream;
 }
 
@@ -108,6 +116,35 @@ void Client::WatchCancel(int64_t watch_id) {
   watch_stream->Write(req);
   watch_stream->WritesDone();
 }
+
+etcd3::pb::KeyValue Client::WaitForValue(const std::string& key,
+                                         WaitCondition condition) {
+  int64_t start_revision;
+  {
+    pb::RangeRequest req;
+    req.set_key(key);
+    pb::RangeResponse res;
+    auto status = Range(req, &res);
+    if (res.kvs_size() > 0 && condition(res.kvs().Get(0))) {
+      return res.kvs().Get(0);
+    }
+    start_revision = res.kvs().Get(0).mod_revision();
+  }
+  auto wcr = new pb::WatchCreateRequest();
+  wcr->set_key(key);
+  wcr->set_start_revision(start_revision);
+  auto changes = MakeWatchStream(wcr);
+
+  pb::WatchResponse res;
+  while (changes->Read(&res)) {
+    for (pb::Event event: res.events()) {
+      if (event.kv().key() == key && condition(event.kv())) {
+        return event.kv();
+      }
+    }
+  }
+}
+
 
 // Utility functions, mostly for working with transactions
 

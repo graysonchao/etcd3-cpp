@@ -39,12 +39,24 @@ class Client {
   grpc::Status Range(const pb::RangeRequest &request,
                      pb::RangeResponse *response) const;
 
+  // Get a range of keys, which can also be a single key or the set of all keys
+  // matching a prefix.
+  grpc::Status DeleteRange(const pb::DeleteRangeRequest &request,
+                           pb::DeleteRangeResponse *response) const;
+
   // Create a watch stream, which is a bidirectional GRPC stream where the
   // client receives all change events to the requested keys.
+  // Takes ownership of the input WatchCreateRequest.
   // The first event received contains the result of the connection attempt.
-  WatchStreamPtr MakeWatchStream(const pb::WatchRequest& req);
+  WatchStreamPtr MakeWatchStream(pb::WatchCreateRequest* req) const;
 
   void WatchCancel(int64_t watch_id);
+
+  // Watch the given key until CONDITION returns true on an update KeyValue.
+  // Returns the matching KeyValue.
+  typedef std::function<bool(etcd3::pb::KeyValue)> WaitCondition;
+  etcd3::pb::KeyValue WaitForValue(const std::string& key,
+                                   WaitCondition condition);
 
   // Request a lease, which is a session with etcd kept alive by
   // LeaseKeepAlive requests. It can be associated with keys and locks to
